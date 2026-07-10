@@ -5,6 +5,7 @@ post.py contains routes associated with posts.
 from fastapi import Depends, HTTPException, status, Response, APIRouter
 from sqlalchemy.orm import Session
 from typing import List
+from pydantic import EmailStr
 
 from .. import schemas, models
 from .. database import get_db
@@ -30,6 +31,14 @@ def create_post(post: schemas.PostBase, db: Session = Depends(get_db)):
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts
+
+
+@router.get("/", response_model=schemas.PostResponse)
+def get_user_posts(email: EmailStr, db: Session = Depends(get_db)):
+    """
+    Reminder: Please fix this function
+    """
+    db.query(models.User)
 
 # Route dedicated to getting the latest post
 @router.get("/latest", response_model=schemas.PostResponse)

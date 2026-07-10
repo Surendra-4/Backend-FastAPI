@@ -5,7 +5,7 @@ auth.py contains routes associated with authentication.
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from .. import schemas, models
+from .. import schemas, models, oauth2
 from .. database import get_db
 from .. utils import verify_hash
 
@@ -25,6 +25,7 @@ def user_login(auth: schemas.AuthBase, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Invalid credentials')
     
     if verify_hash(auth.password, record.password):
-        return 'Login is successful'
+        jwt_token = oauth2.create_access_token(data={"email": auth.email})
+        return {"access_token": jwt_token, "token_type": "bearer"}
     else:
-        return 'Login is unsuccessful'
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Invalid credentials')
