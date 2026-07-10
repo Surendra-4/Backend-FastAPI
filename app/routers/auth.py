@@ -1,3 +1,7 @@
+"""
+auth.py contains routes associated with authentication.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -10,6 +14,9 @@ router = APIRouter(
     tags=['Authentication']
 )
 
+# Path Operation Functions of "Authentication"
+
+# Route dedicated to logging in an user
 @router.post('/login')
 def user_login(auth: schemas.AuthBase, db: Session = Depends(get_db)):
     record = db.query(models.User).filter(models.User.email == auth.email).first()

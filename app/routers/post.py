@@ -1,3 +1,7 @@
+"""
+post.py contains routes associated with posts.
+"""
+
 from fastapi import Depends, HTTPException, status, Response, APIRouter
 from sqlalchemy.orm import Session
 from typing import List
@@ -10,8 +14,9 @@ router = APIRouter(
     tags=['Posts']
 )
 
-### Path Operation Functions of "Posts"
+# Path Operation Functions of "Posts"
 
+# Route dedicated to creating posts
 @router.post("/", response_model=schemas.PostResponse)
 def create_post(post: schemas.PostBase, db: Session = Depends(get_db)):
     new_post = models.Post(**post.model_dump())
@@ -20,25 +25,25 @@ def create_post(post: schemas.PostBase, db: Session = Depends(get_db)):
     db.refresh(new_post)
     return new_post
 
-
+# Route dedicated to getting posts
 @router.get("/", response_model=List[schemas.PostResponse])
 def get_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     return posts
 
-
+# Route dedicated to getting the latest post
 @router.get("/latest", response_model=schemas.PostResponse)
 def get_latest(db: Session = Depends(get_db)):
     post = db.query(models.Post).order_by(models.Post.created_at.desc()).first()
     return post
 
-
+# Route dedicated to getting a post based on a ID
 @router.get("/{id}", response_model=schemas.PostResponse)
 def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     return post
 
-
+# Route dedicated to updating a post based on a ID
 @router.put("/{id}", status_code=status.HTTP_200_OK, response_model=schemas.PostResponse)
 def update_post(id: int, post: schemas.PostBase, db: Session = Depends(get_db)):
     
@@ -54,7 +59,7 @@ def update_post(id: int, post: schemas.PostBase, db: Session = Depends(get_db)):
     
     return updated
     
-
+# Route dedicated to deleting a post based on a ID
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id)

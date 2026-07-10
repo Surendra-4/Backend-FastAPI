@@ -1,7 +1,13 @@
+"""
+This file contains tailored schemas for handling both input and output
+associated with posts, users and authentication.
+"""
+
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
 
+# The following classes deal with schema associated with 'Post'
 class PostBase(BaseModel):
     title: str
     content: str
@@ -16,7 +22,9 @@ class PostResponse(PostBase):
     
     class Config:
         from_attributes = True
-        
+
+
+# The following classes deal with schema associated with 'User'        
 class UserCreate(BaseModel):
     email : EmailStr
     password: str
@@ -30,6 +38,7 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 
+# The following class deals with schema associated with 'Authentication'
 class AuthBase(BaseModel):
     email: EmailStr
     password: str
