@@ -42,3 +42,13 @@ class UserResponse(BaseModel):
 class AuthBase(BaseModel):
     email: EmailStr
     password: str
+    
+    
+# The following class deals with schema associated with 'JWT Tokens'
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    
+class TokenData(BaseModel):
+    id: Optional[str] = None

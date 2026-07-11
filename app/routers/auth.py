@@ -23,10 +23,11 @@ def user_login(auth: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     record = db.query(models.User).filter(models.User.email == auth.username).first()
     
     if not record:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'Invalid credentials')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f'Invalid credentials')
     
     if verify_hash(auth.password, record.password):
         jwt_token = oauth2.create_access_token(data={"email": auth.username})
         return {"access_token": jwt_token, "token_type": "bearer"}
     else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'Invalid credentials')
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f'Invalid credentials')
+    
