@@ -19,6 +19,7 @@ class Post(PostBase):
 class PostResponse(PostBase):
     id: int
     created_at: datetime
+    owner_id: int
     
     class Config:
         from_attributes = True
@@ -51,4 +52,4 @@ class Token(BaseModel):
     token_type: str
     
 class TokenData(BaseModel):
-    id: Optional[str] = None
+    email: Optional[str] = None
