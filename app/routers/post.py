@@ -27,25 +27,24 @@ def create_post(post: schemas.PostBase, db: Session = Depends(get_db),
     db.refresh(new_post)
     return new_post
 
-# Route dedicated to getting posts
+# Route dedicated to getting all posts
 @router.get("/", response_model=List[schemas.PostResponse])
 def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post).all()
     return posts
 
-
-@router.get("/", response_model=schemas.PostResponse)
-def get_user_posts(email: EmailStr, db: Session = Depends(get_db),
+# Route dedicated to getting the all posts of the currently logged in user
+@router.get("/user", response_model=List[schemas.PostResponse])
+def get_user_posts(db: Session = Depends(get_db),
                 current_user: models.User = Depends(oauth2.get_current_user)):
-    """
-    Reminder: Please fix this function
-    """
-    db.query(models.User)
+    user_posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
+    return user_posts
 
-# Route dedicated to getting the latest post
+# Route dedicated to getting the latest post of the currently logged in user
 @router.get("/latest", response_model=schemas.PostResponse)
 def get_latest(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    post = db.query(models.Post).order_by(models.Post.created_at.desc()).first()
+    post = db.query(models.Post).filter(models.Post.owner_id == current_user.id).order_by(
+        models.Post.created_at.desc()).first()
     return post
 
 # Route dedicated to getting a post based on a ID
