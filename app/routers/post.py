@@ -4,7 +4,7 @@ post.py contains routes associated with posts.
 
 from fastapi import Depends, HTTPException, status, Response, APIRouter
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pydantic import EmailStr
 
 from .. import schemas, models, oauth2
@@ -29,8 +29,10 @@ def create_post(post: schemas.PostBase, db: Session = Depends(get_db),
 
 # Route dedicated to getting all posts
 @router.get("/", response_model=List[schemas.PostResponse])
-def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    posts = db.query(models.Post).all()
+def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user),
+            search: Optional[str] = '', limit: int = 5, skip: int = 0):
+    
+    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
     return posts
 
 # Route dedicated to getting the all posts of the currently logged in user
