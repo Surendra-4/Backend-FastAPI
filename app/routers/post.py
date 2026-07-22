@@ -58,25 +58,32 @@ def update_post(id: int, post: schemas.PostBase, db: Session = Depends(get_db), 
     
     post_query = db.query(models.Post).filter(models.Post.id == id)
     
-    updated = post_query.first()
+    to_update = post_query.first()
     
-    if updated is None:
+    if to_update is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id: {id} was not found")
+    
+    if to_update.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f'Not authorized to perform the requested operation')
     
     post_query.update(post.model_dump(), synchronize_session=False)
     db.commit()
     
-    return updated
+    return post_query.first()
     
 # Route dedicated to deleting a post based on a ID
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
-    post = db.query(models.Post).filter(models.Post.id == id)
+    post = db.query(models.Post).filter(models.Post.id == id).first()
     
-    if post.first() == None:
+    if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id: {id} was not found")
     
-    post.delete(synchronize_session=False)
-    db.commit()
+    if post.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f'Not authorized to perform the requested operation')
     
+    db.delete(post)
+    db.commit()
     return post
