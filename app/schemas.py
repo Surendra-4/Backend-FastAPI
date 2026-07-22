@@ -7,23 +7,6 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
 
-# The following classes deal with schema associated with 'Post'
-class PostBase(BaseModel):
-    title: str
-    content: str
-    published: Optional[bool] = True
-    
-class Post(PostBase):
-    pass
-
-class PostResponse(PostBase):
-    id: int
-    created_at: datetime
-    owner_id: int
-    
-    class Config:
-        from_attributes = True
-
 
 # The following classes deal with schema associated with 'User'        
 class UserCreate(BaseModel):
@@ -53,3 +36,22 @@ class Token(BaseModel):
     
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+
+# The following classes deal with schema associated with 'Post'
+class PostBase(BaseModel):
+    title: str
+    content: str
+    published: Optional[bool] = True
+    
+class Post(PostBase):
+    pass
+
+class PostResponse(PostBase):
+    id: int
+    created_at: datetime
+    owner_id: int
+    owner: UserResponse
+    
+    class Config:
+        from_attributes = True
