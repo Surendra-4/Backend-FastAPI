@@ -14,6 +14,8 @@ class Post(BaseModel):
     content: str
     published: bool
     
+    
+# This loop ensures that we establish a DB connection before any request appears to the server   
 while True:
     try:
         conn = psycopg.connect(dbname="fastapi", user="postgres", password="56785678", host="localhost", row_factory=dict_row)
