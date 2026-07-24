@@ -5,7 +5,7 @@ associated with posts, users and authentication.
 
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 
 
 # The following classes deal with schema associated with 'User'        
@@ -28,7 +28,7 @@ class AuthBase(BaseModel):
     password: str
     
     
-# The following class deals with schema associated with 'JWT Tokens'
+# The following class deals with schema associated with 'JWT Token'
 
 class Token(BaseModel):
     access_token: str
@@ -55,3 +55,8 @@ class PostResponse(PostBase):
     
     class Config:
         from_attributes = True
+
+# The following classes deal with schema associated with 'Vote'
+class Vote(BaseModel):
+    post_id: int
+    direction: Literal[0, 1]

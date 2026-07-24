@@ -12,7 +12,7 @@ from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql import true
 from sqlalchemy.orm import relationship
-from .database import Base 
+from . database import Base 
 
 # This class defines the table 'posts'
 class Post(Base):
@@ -36,3 +36,11 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('NOW()'), nullable=False)
+    
+    
+# This class defines the table 'votes'
+class Vote(Base):
+    __tablename__ = 'votes'
+    
+    post_id = Column(Integer, ForeignKey('posts.id', ondelete='CASCADE'), primary_key=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True, nullable=False)
