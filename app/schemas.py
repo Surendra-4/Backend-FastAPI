@@ -55,6 +55,10 @@ class PostResponse(PostBase):
     
     class Config:
         from_attributes = True
+        
+class PostVote(BaseModel):
+    Post: PostResponse
+    votes: int
 
 # The following classes deal with schema associated with 'Vote'
 class Vote(BaseModel):

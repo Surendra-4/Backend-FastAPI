@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status, Response, APIRouter
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import EmailStr
+from sqlalchemy import func
 
 from .. import schemas, models, oauth2
 from .. database import get_db
@@ -28,31 +29,43 @@ def create_post(post: schemas.PostBase, db: Session = Depends(get_db),
     return new_post
 
 # Route dedicated to getting all posts
-@router.get("/", response_model=List[schemas.PostResponse])
+@router.get("/", response_model=List[schemas.PostVote])
 def get_posts(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user),
-            search: Optional[str] = '', limit: int = 5, skip: int = 0):
+            search: Optional[str] = '', limit: int = 10, skip: int = 0):
+    '''
+    Because you are querying both an object (models.Post) and an aggregate function (func.count), SQLAlchemy will not
+    return a simple list of Post objects. Instead, .all() returns a list of named tuples. Each row in the result looks like
+    this: (PostObject, votes).
+    '''    
     
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(models.Post.id).filter(
+            models.Post.title.contains(search)).limit(limit).offset(skip).all()
     return posts
 
 # Route dedicated to getting the all posts of the currently logged in user
-@router.get("/user", response_model=List[schemas.PostResponse])
+@router.get("/user", response_model=List[schemas.PostVote])
 def get_user_posts(db: Session = Depends(get_db),
                 current_user: models.User = Depends(oauth2.get_current_user)):
-    user_posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
+    user_posts = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(models.Post.id).filter(
+            models.Post.owner_id == current_user.id).all()
     return user_posts
 
 # Route dedicated to getting the latest post of the currently logged in user
-@router.get("/latest", response_model=schemas.PostResponse)
+@router.get("/latest", response_model=schemas.PostVote)
 def get_latest(db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    post = db.query(models.Post).filter(models.Post.owner_id == current_user.id).order_by(
-        models.Post.created_at.desc()).first()
+    post = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(models.Post.id).filter(
+            models.Post.owner_id == current_user.id).order_by(models.Post.created_at.desc()).first()
     return post
 
 # Route dedicated to getting a post based on a ID
-@router.get("/{id}", response_model=schemas.PostResponse)
+@router.get("/{id}", response_model=schemas.PostVote)
 def get_post(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+    post = db.query(models.Post, func.count(models.Vote.post_id).label('votes')).join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter=True).group_by(
+            models.Post.id).filter(models.Post.id == id).first()
     return post
 
 # Route dedicated to updating a post based on a ID
