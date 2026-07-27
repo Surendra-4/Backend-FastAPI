@@ -7,9 +7,6 @@ from . import models
 from . database import engine
 from . routers import post, user, auth, vote
 
-# Creates all the DB tables defined in models.py if not already present
-models.Base.metadata.create_all(bind=engine)
-
 # Creating our FastAPI instance
 app = FastAPI()
         
