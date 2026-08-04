@@ -1,0 +1,16 @@
+# cd /etc/systemd/system/
+
+[Unit]
+Description=Background Service for FastAPI Application
+After=network.target
+
+[Service]
+User=surendra
+Group=surendra
+WorkingDirectory=/home/surendra/app/src/
+Environment="PATH=/home/surendra/app/venv/bin"
+EnvironmentFile=/home/sanjeev/.env
+ExecStart=/home/surendra/app/venv/bin/gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000
+
+[Install]
+WantedBy=multi-user.target
